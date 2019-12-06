@@ -54,7 +54,7 @@ func TestStartCmdWithMissingHostArg(t *testing.T) {
 func TestStartEdgeStoreWithBlankHost(t *testing.T) {
 	parameters := &edgeStoreParameters{hostURL: ""}
 
-	err := startEdgeStore(parameters)
+	err := startEdgeStore(parameters, false)
 	require.NotNil(t, err)
 	require.Equal(t, errMissingHostURL, err)
 }

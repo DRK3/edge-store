@@ -65,7 +65,7 @@ func createStartCmd(srv server) *cobra.Command {
 				srv:     srv,
 				hostURL: hostURL,
 			}
-			return startEdgeStore(parameters)
+			return startEdgeStore(parameters, false)
 		},
 	}
 }
@@ -94,12 +94,18 @@ func getUserSetVar(cmd *cobra.Command, flagName, envKey string) (string, error) 
 		" (environment variable) have been set.")
 }
 
-func startEdgeStore(parameters *edgeStoreParameters) error {
+func startEdgeStore(parameters *edgeStoreParameters, testBool bool) error {
 	if parameters.hostURL == "" {
 		return errMissingHostURL
 	}
 
 	router := mux.NewRouter()
+
+	if testBool {
+		print("it's true")
+	} else {
+		print("it's false")
+	}
 
 	err := parameters.srv.ListenAndServe(parameters.hostURL, router)
 	if err != nil {
