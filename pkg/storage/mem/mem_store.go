@@ -4,20 +4,21 @@ Copyright SecureKey Technologies Inc. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-package memstore
+package mem
 
 import (
 	"github.com/trustbloc/edge-store/pkg/storage"
 )
 
-// Provider represents an MemStore implementation of the storage.Provider interface
+// Provider represents an memStore implementation of the storage.Provider interface.
+// memStore is a simple DB that's stored in memory. Useful for demos or testing. Not designed to be performant.
 type Provider struct {
-	dbs map[string]*MemStore
+	dbs map[string]*memStore
 }
 
 // NewProvider instantiates Provider
 func NewProvider() *Provider {
-	return &Provider{dbs: make(map[string]*MemStore)}
+	return &Provider{dbs: make(map[string]*memStore)}
 }
 
 // OpenStore opens and returns a store for the given name.
@@ -30,8 +31,8 @@ func (p *Provider) OpenStore(name string) (storage.Store, error) {
 	return store, nil
 }
 
-func (p *Provider) newMemStore(name string) *MemStore {
-	store := MemStore{db: make(map[string][]byte)}
+func (p *Provider) newMemStore(name string) *memStore {
+	store := memStore{db: make(map[string][]byte)}
 
 	p.dbs[name] = &store
 
@@ -58,25 +59,30 @@ func (p *Provider) Close() error {
 		memStore.db = make(map[string][]byte)
 	}
 
-	p.dbs = make(map[string]*MemStore)
+	p.dbs = make(map[string]*memStore)
 
 	return nil
 }
 
-// MemStore is a simple DB that's stored in memory. Useful for demos or testing. Not designed to be performant.
-type MemStore struct {
+// StoreExists tells you whether a store with the given name is already open.
+func (p *Provider) StoreExists(name string) (bool, error) {
+	_, exists := p.dbs[name]
+	return exists, nil
+}
+
+type memStore struct {
 	db map[string][]byte
 }
 
 // Put stores the given key-value pair in the store.
-func (store *MemStore) Put(k string, v []byte) error {
+func (store *memStore) Put(k string, v []byte) error {
 	store.db[k] = v
 
 	return nil
 }
 
 // Get retrieves the value in the store associated with the given key.
-func (store *MemStore) Get(k string) ([]byte, error) {
+func (store *memStore) Get(k string) ([]byte, error) {
 	v, exists := store.db[k]
 	if !exists {
 		return nil, storage.ErrValueNotFound
@@ -85,6 +91,6 @@ func (store *MemStore) Get(k string) ([]byte, error) {
 	return v, nil
 }
 
-func (store *MemStore) close() {
+func (store *memStore) close() {
 	store.db = make(map[string][]byte)
 }

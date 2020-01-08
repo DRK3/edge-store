@@ -61,7 +61,7 @@ func createStartCmd() *cobra.Command {
 		Short: "Create demo data",
 		Long:  "Start populating data in strapi with default studentcards and transcripts",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			hostURL, err := cmdutils.GetUserSetVar(cmd, adminURLFlagName, adminURLEnvKey)
+			hostURL, err := cmdutils.GetUserSetVar(cmd, adminURLFlagName, adminURLEnvKey, false)
 			if err != nil {
 				return err
 			}

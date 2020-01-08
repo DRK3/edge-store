@@ -32,7 +32,7 @@ func TestGetUserSetVar(t *testing.T) {
 	}
 
 	// test missing both command line argument and environment vars
-	env, err := GetUserSetVar(cmd, hostURLFlagName, hostURLEnvKey)
+	env, err := GetUserSetVar(cmd, hostURLFlagName, hostURLEnvKey, false)
 	require.Error(t, err)
 	require.Empty(t, env)
 	require.Contains(t, err.Error(), "TEST_HOST_URL (environment variable) have been set.")
@@ -42,7 +42,7 @@ func TestGetUserSetVar(t *testing.T) {
 	require.NoError(t, err)
 
 	// test resolution via environment variable
-	env, err = GetUserSetVar(cmd, hostURLFlagName, hostURLEnvKey)
+	env, err = GetUserSetVar(cmd, hostURLFlagName, hostURLEnvKey, false)
 	require.NoError(t, err)
 	require.Equal(t, hostURL, env)
 
@@ -54,7 +54,7 @@ func TestGetUserSetVar(t *testing.T) {
 	require.NoError(t, err)
 
 	// test resolution via command line argument - no environment variable set
-	env, err = GetUserSetVar(cmd, hostURLFlagName, "")
+	env, err = GetUserSetVar(cmd, hostURLFlagName, "", false)
 	require.NoError(t, err)
 	require.Equal(t, "other", env)
 }

@@ -15,7 +15,7 @@ import (
 )
 
 // GetUserSetVar returns values either command line flag or environment variable
-func GetUserSetVar(cmd *cobra.Command, flagName, envKey string) (string, error) {
+func GetUserSetVar(cmd *cobra.Command, flagName, envKey string, isOptional bool) (string, error) {
 	if cmd.Flags().Changed(flagName) {
 		value, err := cmd.Flags().GetString(flagName)
 		if err != nil {
@@ -27,7 +27,7 @@ func GetUserSetVar(cmd *cobra.Command, flagName, envKey string) (string, error) 
 
 	value, isSet := os.LookupEnv(envKey)
 
-	if isSet {
+	if isOptional || isSet {
 		return value, nil
 	}
 

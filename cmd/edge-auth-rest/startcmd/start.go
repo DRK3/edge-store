@@ -58,7 +58,7 @@ func createStartCmd(srv server) *cobra.Command {
 		Short: "Start edge-auth",
 		Long:  "Start edge-auth",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			hostURL, err := cmdutils.GetUserSetVar(cmd, hostURLFlagName, hostURLEnvKey)
+			hostURL, err := cmdutils.GetUserSetVar(cmd, hostURLFlagName, hostURLEnvKey, false)
 			if err != nil {
 				return err
 			}

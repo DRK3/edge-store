@@ -13,10 +13,9 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-
-	"github.com/trustbloc/edge-store/pkg/storage/memstore"
-
 	"github.com/stretchr/testify/require"
+
+	"github.com/trustbloc/edge-store/pkg/storage/mem"
 )
 
 const (
@@ -50,7 +49,7 @@ const (
 )
 
 func TestCreateDataVaultHandler_InvalidDataVaultConfigurationJSON(t *testing.T) {
-	op := New(memstore.NewProvider())
+	op := New(mem.NewProvider())
 
 	createVaultHandler := getHandler(t, op, createVaultEndpoint)
 
@@ -66,13 +65,13 @@ func TestCreateDataVaultHandler_InvalidDataVaultConfigurationJSON(t *testing.T) 
 }
 
 func TestCreateDataVaultHandler_ValidDataVaultConfigurationJSON(t *testing.T) {
-	op := New(memstore.NewProvider())
+	op := New(mem.NewProvider())
 
 	createDataVaultExpectSuccess(t, op)
 }
 
 func TestCreateDataVaultHandler_DuplicateDataVault(t *testing.T) {
-	op := New(memstore.NewProvider())
+	op := New(mem.NewProvider())
 
 	createDataVaultExpectSuccess(t, op)
 
@@ -89,7 +88,7 @@ func TestCreateDataVaultHandler_DuplicateDataVault(t *testing.T) {
 }
 
 func TestStoreDocumentHandler_InvalidStructuredDocumentJSON(t *testing.T) {
-	op := New(memstore.NewProvider())
+	op := New(mem.NewProvider())
 
 	storeDocumentEndpointHandler := getHandler(t, op, storeDocumentEndpoint)
 
@@ -105,7 +104,7 @@ func TestStoreDocumentHandler_InvalidStructuredDocumentJSON(t *testing.T) {
 }
 
 func TestStoreDocumentHandler_ValidStructuredDocumentJSON(t *testing.T) {
-	op := New(memstore.NewProvider())
+	op := New(mem.NewProvider())
 
 	createDataVaultExpectSuccess(t, op)
 
@@ -113,7 +112,7 @@ func TestStoreDocumentHandler_ValidStructuredDocumentJSON(t *testing.T) {
 }
 
 func TestStoreDocumentHandler_DuplicateDocuments(t *testing.T) {
-	op := New(memstore.NewProvider())
+	op := New(mem.NewProvider())
 
 	createDataVaultExpectSuccess(t, op)
 
@@ -138,7 +137,7 @@ func TestStoreDocumentHandler_DuplicateDocuments(t *testing.T) {
 }
 
 func TestStoreDocumentHandler_VaultDoesNotExist(t *testing.T) {
-	op := New(memstore.NewProvider())
+	op := New(mem.NewProvider())
 	storeDocumentEndpointHandler := getHandler(t, op, storeDocumentEndpoint)
 
 	req, err := http.NewRequest("POST", "/encrypted-data-vaults/"+testVaultID+"/docs",
@@ -159,7 +158,7 @@ func TestStoreDocumentHandler_VaultDoesNotExist(t *testing.T) {
 }
 
 func TestRetrieveDocumentHandler_VaultDoesNotExist(t *testing.T) {
-	op := New(memstore.NewProvider())
+	op := New(mem.NewProvider())
 	retrieveDocumentEndpointHandler := getHandler(t, op, retrieveDocumentEndpoint)
 
 	req, err := http.NewRequest(http.MethodPost,
@@ -183,7 +182,7 @@ func TestRetrieveDocumentHandler_VaultDoesNotExist(t *testing.T) {
 }
 
 func TestRetrieveDocumentHandler_DocumentDoesNotExist(t *testing.T) {
-	op := New(memstore.NewProvider())
+	op := New(mem.NewProvider())
 
 	createDataVaultExpectSuccess(t, op)
 
@@ -210,7 +209,7 @@ func TestRetrieveDocumentHandler_DocumentDoesNotExist(t *testing.T) {
 }
 
 func TestRetrieveDocumentHandler_DocumentExists(t *testing.T) {
-	op := New(memstore.NewProvider())
+	op := New(mem.NewProvider())
 
 	createDataVaultExpectSuccess(t, op)
 
@@ -241,12 +240,10 @@ func TestRetrieveDocumentHandler_DocumentExists(t *testing.T) {
 }
 
 func TestStoreDocument_FailToMarshal(t *testing.T) {
-	op := New(memstore.NewProvider())
+	op := New(mem.NewProvider())
 
-	newStore, err := op.vaultCollection.provider.OpenStore("store1")
+	_, err := op.vaultCollection.provider.OpenStore("store1")
 	require.NoError(t, err)
-
-	op.vaultCollection.openStores["store1"] = newStore
 
 	unmarshallableMap := make(map[string]interface{})
 	unmarshallableMap["somewhere"] = make(chan int)

@@ -4,7 +4,7 @@ Copyright SecureKey Technologies Inc. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-package memstore
+package mem
 
 import (
 	"testing"
@@ -19,7 +19,7 @@ func TestMemStore_OpenStore(t *testing.T) {
 
 	newStore, err := provider.OpenStore("store1")
 	require.NoError(t, err)
-	require.IsType(t, &MemStore{}, newStore)
+	require.IsType(t, &memStore{}, newStore)
 }
 
 func TestMemStore_OpenExistingStore(t *testing.T) {
@@ -27,7 +27,7 @@ func TestMemStore_OpenExistingStore(t *testing.T) {
 
 	newStore, err := provider.OpenStore("store1")
 	require.NoError(t, err)
-	require.IsType(t, &MemStore{}, newStore)
+	require.IsType(t, &memStore{}, newStore)
 
 	existingStore, err := provider.OpenStore("store1")
 	require.NoError(t, err)
@@ -78,11 +78,11 @@ func TestProvider_CloseStoreDoesNotExist(t *testing.T) {
 }
 
 func TestMemStore_Get(t *testing.T) {
-	memStore := MemStore{db: make(map[string][]byte)}
+	store := memStore{db: make(map[string][]byte)}
 
-	memStore.db["testKey"] = []byte("testValue")
+	store.db["testKey"] = []byte("testValue")
 
-	value, err := memStore.Get("testKey")
+	value, err := store.Get("testKey")
 	require.NoError(t, err)
 
 	require.Equal(t, []byte("testValue"), value)

@@ -44,8 +44,7 @@ type Handler interface {
 func New(provider storage.Provider) *Operation {
 	svc := &Operation{
 		vaultCollection: VaultCollection{
-			provider:   provider,
-			openStores: make(map[string]storage.Store),
+			provider: provider,
 		}}
 	svc.registerHandler()
 
@@ -60,8 +59,7 @@ type Operation struct {
 
 // VaultCollection represents EDV storage.
 type VaultCollection struct {
-	provider   storage.Provider
-	openStores map[string]storage.Store
+	provider storage.Provider
 }
 
 func (c *Operation) createDataVaultHandler(rw http.ResponseWriter, req *http.Request) {
@@ -174,31 +172,42 @@ func (c *Operation) retrieveDocumentHandler(rw http.ResponseWriter, req *http.Re
 }
 
 func (vc *VaultCollection) createDataVault(id string) error {
-	_, exists := vc.openStores[id]
-	if exists {
-		return errDuplicateVault
-	}
-
-	store, err := vc.provider.OpenStore(id)
+	exists, err := vc.provider.StoreExists(id)
 	if err != nil {
 		return err
 	}
 
-	vc.openStores[id] = store
+	if exists {
+		return errDuplicateVault
+	}
+
+	_, err = vc.provider.OpenStore(id)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func (vc *VaultCollection) storeDocument(vaultID string, document structuredDocument) error {
-	vault, exists := vc.openStores[vaultID]
+	exists, err := vc.provider.StoreExists(vaultID)
+	if err != nil {
+		return err
+	}
+
 	if !exists {
 		return errVaultNotFound
+	}
+
+	vault, err := vc.provider.OpenStore(vaultID)
+	if err != nil {
+		return err
 	}
 
 	// The Store Document API call should not overwrite an existing document.
 	// So we first check to make sure there is not already a document associated with the id.
 	// If there is, we send back an error.
-	_, err := vault.Get(document.ID)
+	_, err = vault.Get(document.ID)
 	if err == nil {
 		return errDuplicateDocument
 	} else if err != storage.ErrValueNotFound {
@@ -214,9 +223,18 @@ func (vc *VaultCollection) storeDocument(vaultID string, document structuredDocu
 }
 
 func (vc *VaultCollection) retrieveDocument(vaultID, docID string) ([]byte, error) {
-	vault, exists := vc.openStores[vaultID]
+	exists, err := vc.provider.StoreExists(vaultID)
+	if err != nil {
+		return nil, err
+	}
+
 	if !exists {
 		return nil, errVaultNotFound
+	}
+
+	vault, err := vc.provider.OpenStore(vaultID)
+	if err != nil {
+		return nil, err
 	}
 
 	documentJSON, err := vault.Get(docID)

@@ -16,7 +16,7 @@ var ErrValueNotFound = errors.New("store does not have a value associated with t
 
 // Provider represents a storage provider.
 type Provider interface {
-	// OpenStore opens a store with the given name and returns it.
+	// OpenStore opens a store with the given name and returns it. If no store exists under the given name, it is created.
 	OpenStore(name string) (Store, error)
 
 	// CloseStore closes the store with the given name.
@@ -24,6 +24,9 @@ type Provider interface {
 
 	// Close closes all stores created under this store provider.
 	Close() error
+
+	// StoreExists checks whether a store under the given name exists already.
+	StoreExists(name string) (bool, error)
 }
 
 // Store represents a storage database.

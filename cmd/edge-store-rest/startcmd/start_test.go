@@ -28,12 +28,14 @@ func TestStartCmdContents(t *testing.T) {
 	require.Equal(t, "Start edge-store", startCmd.Long)
 
 	checkFlagPropertiesCorrect(t, startCmd, hostURLFlagName, hostURLFlagShorthand, hostURLFlagUsage)
+	checkFlagPropertiesCorrect(t, startCmd, databaseTypeFlagName, databaseTypeFlagShorthand, databaseTypeFlagUsage)
+	checkFlagPropertiesCorrect(t, startCmd, databaseURLFlagName, databaseURLFlagShorthand, databaseURLFlagUsage)
 }
 
 func TestStartCmdWithBlankHostArg(t *testing.T) {
 	startCmd := GetStartCmd(&mockServer{})
 
-	args := []string{"--" + hostURLFlagName, ""}
+	args := []string{"--" + hostURLFlagName, "", "--" + databaseTypeFlagName, "memstore"}
 	startCmd.SetArgs(args)
 
 	err := startCmd.Execute()
@@ -62,7 +64,7 @@ func TestStartEdgeStoreWithBlankHost(t *testing.T) {
 func TestStartCmdValidArgs(t *testing.T) {
 	startCmd := GetStartCmd(&mockServer{})
 
-	args := []string{"--" + hostURLFlagName, "localhost:8080"}
+	args := []string{"--" + hostURLFlagName, "localhost:8080", "--" + databaseTypeFlagName, "memstore"}
 	startCmd.SetArgs(args)
 
 	err := startCmd.Execute()
@@ -74,6 +76,9 @@ func TestStartCmdValidArgsEnvVar(t *testing.T) {
 	startCmd := GetStartCmd(&mockServer{})
 
 	err := os.Setenv(hostURLEnvKey, "localhost:8080")
+	require.Nil(t, err)
+
+	err = os.Setenv(databaseTypeEnvKey, "memstore")
 	require.Nil(t, err)
 
 	err = startCmd.Execute()
@@ -88,8 +93,4 @@ func checkFlagPropertiesCorrect(t *testing.T, cmd *cobra.Command, flagName, flag
 	require.Equal(t, flagName, flag.Name)
 	require.Equal(t, flagShorthand, flag.Shorthand)
 	require.Equal(t, flagUsage, flag.Usage)
-	require.Equal(t, "", flag.Value.String())
-
-	flagAnnotations := flag.Annotations
-	require.Nil(t, flagAnnotations)
 }
